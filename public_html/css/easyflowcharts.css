@@ -59,3 +59,9 @@ header, footer {
 .texthead {
     text-align: right;
 }
+
+#nblogo {
+    padding-top: 5px;
+    padding-bottom: 5px;
+    padding-right: 5px;
+}
