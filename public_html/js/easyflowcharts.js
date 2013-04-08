@@ -715,6 +715,9 @@ function setLevelDown( node ) {
                     targetNode.level = node.level + 1;
                 } else {
                     noLoop = false;
+                    if( targetNode.outNodes.length === 0 ) {
+                        targetNode.level = node.level + 1;
+                    }
                 }
             }
             if( noLoop ) {
