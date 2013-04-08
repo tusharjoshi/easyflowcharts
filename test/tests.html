@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Easy Flow Charts Tests</title>
+<script type='text/javascript'>
+    window.Muscula = { settings:{
+        logId:"DyFyqOC-npkUr", suppressErrors: false, branding: 'none'
+    }};
+    (function () {
+        var m = document.createElement('script'); m.type = 'text/javascript'; m.async = true;
+        m.src = (window.location.protocol === 'https:' ? 'https:' : 'http:') +
+            '//musculahq.appspot.com/Muscula.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(m, s);
+        window.Muscula.run=function(c){eval(c);window.Muscula.run=function(){};};
+        window.Muscula.errors=[];window.onerror=function(){window.Muscula.errors.push(arguments);
+        return window.Muscula.settings.suppressErrors===undefined;};
+    })();
+</script>
+<link rel="stylesheet" type="text/css" href="../public_html/css/bootstrap.min.css">
+<link rel="stylesheet" type="text/css" href="../public_html/css/easyflowcharts.css">
+<link rel="stylesheet" type="text/css" href="http://code.jquery.com/qunit/qunit-1.11.0.css">
+<script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
+<script src="http://code.createjs.com/easeljs-0.6.0.min.js"></script>
+<script src="../public_html/js/easyflowcharts.js"></script>
+<script src="http://code.jquery.com/qunit/qunit-1.11.0.js"></script>
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-39859761-1', 'easyflowcharts.com');
+  ga('send', 'pageview');
+
+</script>
+</head>
+<body>
+<div id="qunit"></div>
+<div id="qunit-fixture"></div>
+<canvas id="demoCanvas" style="display: none;"></canvas>
+<script>
+test( "Easy Flow Charts Utility methods", function() {
+    var value = "hello";
+    equal( value, "hello", "We expect value to be hello" );
+    
+    stage = new createjs.Stage("demoCanvas");
+    var codetext = "Start->Check Value\n" 
+                + "Check Value->Do This: yes\n" 
+                + "Check Value->Do That: no\n" 
+                + "Do This->A\n"  
+                + "A->Stop\n"
+                + "Do That->One\n"
+                + "Do That->Two\n"
+                + "One->Stop\n"
+                + "Two->Stop";
+        
+    updateChartWithText(codetext); 
+    setFlowNodeLevels();
+    alert( flowNodeArray);
+});
+</script>
+<script src="js/bootstrap.min.js"></script>
+</body>
+</html>
