@@ -65,3 +65,7 @@ header, footer {
     padding-bottom: 5px;
     padding-right: 5px;
 }
+
+.smalltext {
+    font-size: 9px;
+}
