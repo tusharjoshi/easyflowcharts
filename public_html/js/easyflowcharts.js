@@ -43,7 +43,12 @@ function MyConnector(color, x1, y1, x2, y2, text) {
     this.y2 = y2;
     this.textwidth = 0;
     this.textheight = 0;
-
+    
+    /*GitIssue #4 Begin: 23Apr2013-abhishekanne- Direction arrow on connector line */
+    this.arrowSize=10;
+    this.angle = Math.atan2(this.y2-this.y1,this.x2-this.x1);
+    /*GitIssue #4 End*/
+    
     this.displayObjects = new Array();
 
     this.displayObjects['text'] = new createjs.Text(text, fontstyle, textcolor);
@@ -57,9 +62,14 @@ function MyConnector(color, x1, y1, x2, y2, text) {
             .beginStroke("black")
             .moveTo(this.x1,this.y1)
             .lineTo(this.x2,this.y2)
+            /*GitIssue #4 Begin: 23Apr2013-abhishekanne- Direction arrow on connector line */
+            .lineTo(this.x2-this.arrowSize*Math.cos(this.angle-Math.PI/6),this.y2-this.arrowSize*Math.sin(this.angle-Math.PI/6))
+            .moveTo(this.x2, this.y2)
+            .lineTo(this.x2-this.arrowSize*Math.cos(this.angle+Math.PI/6),this.y2-this.arrowSize*Math.sin(this.angle+Math.PI/6))
+            /*GitIssue #4 End */
             .closePath()
             .endStroke();
-
+    
     this.displayObjects['line'].shadow = new createjs.Shadow(shadowcolor, 2, 2, 5);
 
     if( text === "undefined" )
@@ -86,7 +96,7 @@ function MyConnector(color, x1, y1, x2, y2, text) {
     };
 
     this.displayObjects['line'].move = this.move;
-    this.displayObjects['line'].onPress = pressHandler;
+    this.displayObjects['line'].onPress = pressHandler;   
 }
 
 function MyDiamond(color, x, y, width, height, text) {
