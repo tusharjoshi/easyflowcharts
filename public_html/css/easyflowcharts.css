@@ -58,6 +58,11 @@ header, footer {
 
 .texthead {
     text-align: right;
+    margin-top: 10px;
+}
+
+.diagramactions {
+    margin-top: 10px;
 }
 
 #nblogo {
