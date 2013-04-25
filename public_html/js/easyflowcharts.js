@@ -33,8 +33,9 @@ var shadowcolor = "black";
 var fillcolor = "#f4f4f4";
 
 
-function MyConnector(color, x1, y1, x2, y2, text) {
+function MyConnector(myContainer, color, x1, y1, x2, y2, text) {
 
+    this.myContainer = myContainer;
     this.x1 = x1;
     this.y1 = y1;
     this.fill = color;
@@ -57,7 +58,13 @@ function MyConnector(color, x1, y1, x2, y2, text) {
 
     this.displayObjects['line'] = new createjs.Shape();
     this.displayObjects['line'].mainObject = this;
-    this.displayObjects['line'].graphics
+    
+    
+    
+    this.drawGraphics = function () {
+        this.angle = Math.atan2(this.y2-this.y1,this.x2-this.x1);
+        this.displayObjects['line'].graphics
+            .clear()
             .setStrokeStyle(2)
             .beginStroke("black")
             .moveTo(this.x1,this.y1)
@@ -69,6 +76,9 @@ function MyConnector(color, x1, y1, x2, y2, text) {
             /*GitIssue #4 End */
             .closePath()
             .endStroke();
+    };
+    
+    this.drawGraphics();
     
     this.displayObjects['line'].shadow = new createjs.Shadow(shadowcolor, 2, 2, 5);
 
@@ -77,8 +87,12 @@ function MyConnector(color, x1, y1, x2, y2, text) {
             text = "";
     }
     
-    this.displayObjects['text'].x = (this.x1 + this.x2)/2;
-    this.displayObjects['text'].y = (this.y1 + this.y2)/2;
+    this.setTextPosition = function () {
+        this.displayObjects['text'].x = (this.x1 + this.x2)/2;
+        this.displayObjects['text'].y = (this.y1 + this.y2)/2;
+    }
+    
+    this.setTextPosition();
 
     this.addChild = function (stage) {
             stage.addChild(this.displayObjects['line']);
@@ -86,21 +100,42 @@ function MyConnector(color, x1, y1, x2, y2, text) {
     };
 
     this.move = function (xmove, ymove) {
-        var line = this.mainObject.displayObjects['line'];
+        /* var line = this.mainObject.displayObjects['line'];
         var text = this.mainObject.displayObjects['text'];
         line.x = xmove;
         line.y = ymove;		
 
         text.x = xmove + (this.mainObject.x1 + this.mainObject.x2)/2;
-        text.y = ymove + (this.mainObject.y1 + this.mainObject.y2)/2;
+        text.y = ymove + (this.mainObject.y1 + this.mainObject.y2)/2; */
     };
 
-    this.displayObjects['line'].move = this.move;
+    this.moveSource = function (xmove, ymove) {
+        
+        console.log("xmove="+xmove+", ymove=" +ymove);
+        this.mainObject.x1 = xmove;
+        this.mainObject.y1 = ymove;
+        
+        this.setTextPosition();
+        
+        this.mainObject.drawGraphics();
+    };
+
+    this.moveTarget = function (xmove, ymove) {
+        this.mainObject.x2 = xmove;
+        this.mainObject.y2 = ymove;
+        
+        this.setTextPosition();
+        
+        this.mainObject.drawGraphics();
+    };
+
+    this.displayObjects['line'].mainObject = this;
     this.displayObjects['line'].onPress = pressHandler;   
 }
 
-function MyDiamond(color, x, y, width, height, text) {
+function MyDiamond(myContainer, color, x, y, width, height, text) {
 
+    this.myContainer = myContainer;
     this.width = width;
     this.height = height;
     this.fill = color;
@@ -191,12 +226,13 @@ function MyDiamond(color, x, y, width, height, text) {
         this.mainObject.setY(ymove);
     };
 
-    this.displayObjects['rect'].move = this.move;
+    this.displayObjects['rect'].mainObject = this;
     this.displayObjects['rect'].onPress = pressHandler;
 }
 
-function MyRect(color, x, y, width, height, text) {
+function MyRect(myContainer, color, x, y, width, height, text) {
 
+    this.myContainer = myContainer;
     this.width = width;
     this.height = height;
     this.fill = color;
@@ -280,12 +316,13 @@ function MyRect(color, x, y, width, height, text) {
         this.mainObject.setY(ymove);
     };
 
-    this.displayObjects['rect'].move = this.move;
+    this.displayObjects['rect'].mainObject = this;
     this.displayObjects['rect'].onPress = pressHandler;
 }
 
-function MyCircle(color, x, y, radius, text) {
+function MyCircle(myContainer, color, x, y, radius, text) {
 
+    this.myContainer = myContainer;
     this.radius = radius;
     this.fill = color;
     this.mainObject = this;
@@ -363,7 +400,7 @@ function MyCircle(color, x, y, radius, text) {
         this.mainObject.setY(ymove);
     };
 
-    this.displayObjects['circle'].move = this.move;
+    this.displayObjects['circle'].mainObject = this;
     this.displayObjects['circle'].onPress = pressHandler;
 }
 
@@ -393,17 +430,27 @@ function changeCanvasSize( width, height) {
 var xs = 0;
 var ys = 0;
 
-function pressHandler(e){
- e.onMouseMove = function(ev){
+function pressHandler(pressEvent){
+    pressEvent.onMouseMove = function(moveEvent){
      
-  if( update === false ) {
-	xs  = ev.stageX - e.target.x;
-	ys = ev.stageY - e.target.y;
-  }
-  e.target.move(ev.stageX - xs, ev.stageY - ys);
+        if( update === false ) {
+            xs  = moveEvent.stageX - pressEvent.target.x;
+            ys = moveEvent.stageY - pressEvent.target.y;
+        }
   
-  update = true;
- };
+        // the target is the display object
+        // call its myContainer for move
+        var myShape = pressEvent.target;
+        var display = myShape.mainObject;
+        if( display.myContainer ) {
+            display.myContainer.x = moveEvent.stageX - xs;
+            display.myContainer.y = moveEvent.stageY - ys;
+            if( display.myContainer.move ) {
+                display.myContainer.move();
+            }
+        }
+        update = true;
+    };
 }
 
 function tick(){ 
@@ -472,6 +519,7 @@ function FlowNode(name) {
     this.outCount = 0;
     this.inCount = 0;
     this.outNodes = new Array();
+    this.inNodes = new Array();
     
     this.toString = function () {
         var text = "[Node:" + this.name + ", Level:" + this.level + "]\n";
@@ -481,23 +529,51 @@ function FlowNode(name) {
         return text;
     };
     
+    this.setType = function(type) {
+        this.type = type;
+        if( this.display ) {
+            this.display = null;
+        }
+    }
+    
     this.addOutNode = function (node ) {
         this.outNodes[this.outNodes.length] = node;
         this.outCount = this.outNodes.length;
     };
     
+    this.addInNode = function (node ) {
+        this.inNodes[this.inNodes.length] = node;
+        this.inCount = this.inNodes.length;
+    };
+    
     this.createDisplay = function () {
         if( this.type === "start" || this.type === "stop" ) {
-            this.display = new MyCircle(fillcolor, this.x,this.y, 20, this.name ); //+ "(" + this.column + "," + this.level + ")");
+            this.display = new MyCircle(this, fillcolor, this.x,this.y, 20, this.name ); //+ "(" + this.column + "," + this.level + ")");
         } else if( this.type === "diamond" ) {
             this.display = 
-                    new MyDiamond(fillcolor, this.x, 
+                    new MyDiamond(this, fillcolor, this.x, 
                         this.y, 20, 50, this.name ); //+ "(" + this.column + "," + this.level + ")");
 
         } else {
             this.display = 
-                    new MyRect(fillcolor, this.x, 
+                    new MyRect(this, fillcolor, this.x, 
                         this.y, 20, 50, this.name); //+ "(" + this.column + "," + this.level + ")");       
+        }
+    };
+    
+    this.move = function() {
+        // move the display object
+        this.display.move(this.x, this.y);
+        
+        // move the connectors
+        for( var index = 0 ; index < this.outNodes.length; index++ ) {
+            var outNode = this.outNodes[index];
+            outNode.moveSource(this.x, this.y);
+        }
+        
+        for( var index = 0 ; index < this.inNodes.length; index++ ) {
+            var inNode = this.inNodes[index];
+            inNode.moveTarget(this.x, this.y);
         }
     };
     
@@ -516,46 +592,47 @@ function FlowNode(name) {
     
     this.getSourceX = function () {
         if( this.type === "start" || this.type === "stop") {
-            return this.display.x + this.display.radius;
+            return this.x ; //+ this.display.radius;
         } else if( this.type === "diamond") {
             if( this.display.connectCount === 0 ) {
                 this.display.connectCount++;
-                return this.display.x;
+                return this.x;
             } else {
-                return this.display.x + this.display.width;    
+                this.display.connectCount = 0;
+                return this.x + this.display.width;    
             }
         } else {
-            return this.display.x + this.display.width/2;            
+            return this.x + this.display.width/2;            
         }
     };
     
     this.getSourceY = function () {
         if( this.type === "start" || this.type === "stop") {
-            return this.display.y + this.display.radius * 2;
+            return this.y + this.display.radius;
         } else if( this.type === "diamond") {
-            return this.display.y + this.display.height/2;                        
+            return this.y + this.display.height/2;                        
         } else {
-            return this.display.y + this.display.height;            
+            return this.y + this.display.height;            
         }
     };
     
     this.getTargetX = function () {
         if( this.type === "start" || this.type === "stop") {
-            return this.display.x + this.display.radius;
+            return this.x ; //+ this.display.radius;
         } else if( this.type === "diamond") {
-            return this.display.x + this.display.width/2;            
+            return this.x + this.display.width/2;            
         } else {
-            return this.display.x + this.display.width/2;            
+            return this.x + this.display.width/2;            
         }
     };
     
     this.getTargetY = function () {
         if( this.type === "start" || this.type === "stop") {
-            return this.display.y;
+            return this.y - this.display.radius;
         } else if( this.type === "diamond") {
-            return this.display.y;            
+            return this.y;            
         } else {
-            return this.display.y;            
+            return this.y;            
         }
     };
     
@@ -587,10 +664,24 @@ function NodeRelation(name, sourceNode, targetNode) {
     this.display = null;
     
     this.createDisplay = function () {
-        this.display = new MyConnector(fillcolor, 
+        this.display = new MyConnector(this, fillcolor, 
             sourceNode.getSourceX(),sourceNode.getSourceY(), 
             targetNode.getTargetX(), targetNode.getTargetY(), 
             this.name);
+    };
+    
+    this.move = function( xmove, ymove) {
+        this.display.move( xmove, ymove);
+    };
+    
+    this.moveSource = function( xmove, ymove) {
+        this.display.moveSource( sourceNode.getSourceX(),sourceNode.getSourceY());
+    };
+    
+    this.moveTarget = function( xmove, ymove) {
+        if( this.display ) {
+            this.display.moveTarget( targetNode.getTargetX(), targetNode.getTargetY());
+        }
     };
     
     this.addChild = function (stage) {
@@ -641,6 +732,7 @@ function updateFlowNodeArray( tokens ) {
     var nodeRelation = new NodeRelation(relName,leftNode, rightNode);
     nodeRelationArray[nodeRelationArray.length] = nodeRelation;
     leftNode.addOutNode( nodeRelation );
+    rightNode.addInNode( nodeRelation );
     
 }
 
@@ -888,7 +980,8 @@ function setFlowNodeLevels() {
     var levelNodes = getNodesByLevel(calculateMaxLevel());
     for( var j = 0 ; j < levelNodes.length; j++ ) {
         var node = levelNodes[j];
-        node.type = "stop";
+        //node.type = "stop";
+        node.setType("stop");
     }
     //alert(flowNodeArray);
 }
