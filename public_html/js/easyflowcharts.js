@@ -90,7 +90,7 @@ function MyConnector(myContainer, color, x1, y1, x2, y2, text) {
     this.setTextPosition = function () {
         this.displayObjects['text'].x = (this.x1 + this.x2)/2;
         this.displayObjects['text'].y = (this.y1 + this.y2)/2;
-    }
+    };
     
     this.setTextPosition();
 
@@ -534,7 +534,7 @@ function FlowNode(name) {
         if( this.display ) {
             this.display = null;
         }
-    }
+    };
     
     this.addOutNode = function (node ) {
         this.outNodes[this.outNodes.length] = node;
